@@ -15,6 +15,7 @@
     {{ block.super }}
     <script type="text/javascript" src="../../jsi18n/"></script>
     <script type="text/javascript" src="{{ settings_var.URL_FILEBROWSER_MEDIA }}js/fileuploader.js"></script>
+    <script language="javascript" type="text/javascript" src="{{ settings_var.URL_FILEBROWSER_MEDIA }}js/FB_FileBrowseField.js"></script>
     <script type="text/javascript">
     (function($){
         $(document).ready(function() {
@@ -51,6 +52,7 @@
                     '<a class="qq-upload-cancel" href="#">{% trans "Cancel" %}</a>' +
                     '<span class="qq-upload-failed-text">{% trans "Failed" %}</span>' +
                     '<div class="progress-bar"><div class="content"></div></div>' +
+                    '<a class="qq-upload-complete-text" style="display: none;" href="#">{% trans "Complete" %}</a>' +
                 '</li>',
 
                 params: { 'csrf_token': '{{ csrf_token }}',
@@ -87,6 +89,11 @@
                     bar.css('width', new_width);
                 },
                 onComplete: function(id, fileName, resp){
+                    var complete = this.getItem(id).find('.qq-upload-complete-text');
+{% if query.pop %}
+	            complete.click(function() { FileSubmit(resp.path, resp.url, resp.thumbnail, resp.filetype); });
+{% endif %}
+                    complete.show();
                     // if (resp.success) {
                     //     this.getItem(id).fadeOut('slow');
                     // }

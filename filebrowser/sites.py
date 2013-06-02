@@ -23,7 +23,7 @@ from django.core.exceptions import ImproperlyConfigured
 
 # FILEBROWSER IMPORTS
 from filebrowser.settings import *
-from filebrowser.functions import get_breadcrumbs, get_filterdate, get_settings_var, handle_file_upload, convert_filename
+from filebrowser.functions import get_breadcrumbs, get_filterdate, get_settings_var, handle_file_upload, convert_filename, get_version_path, version_generator
 from filebrowser.templatetags.fb_tags import query_helper
 from filebrowser.base import FileListing, FileObject
 from filebrowser.decorators import path_exists, file_exists
@@ -489,11 +489,22 @@ class FileBrowserSite(object):
                 self.storage.move(new_file, old_file, allow_overwrite=True)
             else:
                 file_name = smart_unicode(uploadedfile)
+
+            fobj = FileObject(smart_unicode(file_name), site=self)
             
-            signals.filebrowser_post_upload.send(sender=request, path=request.POST.get('folder'), file=FileObject(smart_unicode(file_name), site=self), site=self)
+            signals.filebrowser_post_upload.send(sender=request, path=request.POST.get('folder'), file=fobj, site=self)
+
             
+            if fobj.filetype == "Image":
+                version_path = get_version_path(fobj.path,ADMIN_THUMBNAIL,site=self)
+                if not self.storage.isfile(version_path):
+                    version_path = version_generator(fobj.path, ADMIN_THUMBNAIL, site=self)
+                thumbnail_path = self.storage.url(version_path)
+            else:
+                thumbnail_path = ''
+
             # let Ajax Upload know whether we saved it or not
-            ret_json = {'success': True, 'filename': filedata.name}
+            ret_json = {'success': True, 'filename': filedata.name, 'path': fobj.path, 'url': fobj.url, 'thumbnail': thumbnail_path, 'filetype': fobj.filetype }
             return HttpResponse(json.dumps(ret_json))
 
 storage = DefaultStorage()
