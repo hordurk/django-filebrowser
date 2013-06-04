@@ -11,7 +11,7 @@ from django.utils.translation import ugettext as _
 from filebrowser.settings import *
 from filebrowser.functions import get_file_type, url_join, get_version_path, get_original_path, sort_by_attr, version_generator, path_strip, url_strip
 from django.utils.encoding import smart_str, smart_unicode
-
+ 
 # PIL import
 if STRICT_PIL:
     from PIL import Image
